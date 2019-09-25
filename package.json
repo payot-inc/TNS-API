@@ -1,0 +1,19 @@
+{
+  "name": "node-app",
+  "version": "0.0.1",
+  "author": {
+    "name": "kimyonghee",
+    "email": "kyh1028@gmail.com"
+  },
+  "scripts": {
+    "dev": "nodemon --exec babel-node ./src/app.js",
+    "build": "npx babel src --out-dir dist"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.6.2",
+    "@babel/core": "^7.6.2",
+    "@babel/node": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "nodemon": "^1.19.2"
+  }
+}
