@@ -1,11 +1,13 @@
 {
   "name": "node-app",
+  "description": "server side application",
   "version": "0.0.1",
   "author": {
     "name": "kimyonghee",
     "email": "kyh1028@gmail.com"
   },
   "scripts": {
+    "start": "npm run build && node ./dist/app.js",
     "dev": "nodemon --exec babel-node ./src/app.js",
     "build": "babel src --out-dir dist"
   },
@@ -14,6 +16,7 @@
     "@babel/core": "^7.6.2",
     "@babel/node": "^7.6.2",
     "@babel/preset-env": "^7.6.2",
-    "nodemon": "^1.19.2"
+    "nodemon": "^1.19.2",
+    "prettier": "^1.18.2"
   }
 }
