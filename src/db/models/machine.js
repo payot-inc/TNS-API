@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       id: { type: DataTypes.STRING, primaryKey: true },
       name: DataTypes.STRING,
+      isBroken: { type: DataTypes.BOOLEAN, defaultValue: false },
     },
     {
       timestamps: false,

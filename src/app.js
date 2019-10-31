@@ -9,6 +9,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 
 import AdminRouter from './routes/admin';
+import KioskRouter from './routes/kiosk';
 
 const app = express();
 const server = http.createServer(app);
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/admin', AdminRouter);
+app.use('/kiosk', KioskRouter);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT);

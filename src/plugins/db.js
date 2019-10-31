@@ -5,4 +5,4 @@ global.db = db;
 global.Op = Sequelize.Op;
 global.sequelize = sequelize;
 
-db.sequelize.sync().then(() => console.log('db 초기화'));
+// db.sequelize.sync({ force: true }).then(() => console.log('db 초기화'));

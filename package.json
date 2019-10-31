@@ -9,6 +9,7 @@
   "scripts": {
     "start": "npm run build && node ./dist/app.js",
     "dev": "nodemon --exec babel-node ./src/app.js",
+    "dummy": "babel-node ./src/dummy.js",
     "build": "babel src --out-dir dist"
   },
   "devDependencies": {
@@ -16,6 +17,7 @@
     "@babel/core": "^7.6.2",
     "@babel/node": "^7.6.2",
     "@babel/preset-env": "^7.6.2",
+    "faker": "^4.1.0",
     "nodemon": "^1.19.2",
     "prettier": "^1.18.2"
   },
