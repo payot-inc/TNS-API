@@ -8,6 +8,7 @@ import express from 'express';
 import websocket from './plugins/websocket';
 import cors from 'cors';
 import helmet from 'helmet';
+import morgan from 'morgan';
 
 import AdminRouter from './routes/admin';
 import KioskRouter from './routes/kiosk';
@@ -16,6 +17,7 @@ const app = express();
 const server = http.createServer(app);
 const socket = websocket(server);
 
+app.use(morgan());
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
