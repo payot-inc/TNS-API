@@ -9,19 +9,25 @@
     "logging": false
   },
   "test": {
-    "username": "root",
-    "password": null,
-    "database": "database_test",
+    "username": "ubuntu",
+    "password": "root",
+    "database": "db",
     "host": "127.0.0.1",
     "dialect": "mysql",
-    "operatorsAliases": false
+    "logging": false,
+    "options": {
+      "timezone": "+09:00"
+    }
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
+    "username": "ubuntu",
+    "password": "root",
+    "database": "db",
     "host": "127.0.0.1",
     "dialect": "mysql",
-    "operatorsAliases": false
+    "logging": false,
+    "options": {
+      "timezone": "+09:00"
+    }
   }
 }
