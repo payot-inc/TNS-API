@@ -70,7 +70,7 @@ router.post('/machine/error', async (req, res, next) => {
 // 결제 처리
 router.post('/pay', async (req, res, next) => {
   const { method, amount, products, returnCoin } = req.body;
-  const productIds = products.map(({ machine, product }) => `${machine}${product}`);
+  const productIds = products.map(({ id }) => id);
   const row = await db.sell.create({ method, amount, products: productIds, change: returnCoin });
 
   res.json(row);

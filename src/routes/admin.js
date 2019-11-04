@@ -67,6 +67,7 @@ router.get('/sales', async (req, res, next) => {
       },
     },
     attributes: ['id', 'amount', 'method', 'products', 'createdAt'],
+    order: [['createdAt', 'DESC']],
     limit: Number(limit),
     offset: (Number(page) - 1) * Number(limit),
     raw: true,
