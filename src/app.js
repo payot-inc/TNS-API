@@ -1,3 +1,4 @@
+import '@babel/polyfill';
 import './plugins/env';
 import './plugins/db';
 import './plugins/websocket';
