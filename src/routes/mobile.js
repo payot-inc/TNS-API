@@ -1,16 +1,19 @@
 import { Router } from 'express';
 
-const router = Router();
+export default function(socket_subject) {
+  const router = Router();
 
-router.post('/pay', async (req, res, next) => {
-  const { amount } = req.body;
-  const sendKioskMessage = {
-    type: 'pay',
-    amount,
-  };
-  req.socket.write(JSON.stringify(sendKioskMessage));
+  router.post('/pay', async (req, res, next) => {
+    const { amount } = req.body;
+    const sendKioskMessage = {
+      type: 'pay',
+      amount: Number(amount),
+    };
 
-  res.json({ sucess: true });
-});
+    socket_subject.next(JSON.stringify(sendKioskMessage));
 
-export default router;
+    res.json({ sucess: true });
+  });
+
+  return router;
+}
