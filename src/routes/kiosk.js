@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import db from '../db/models';
 import numeral from 'numeral';
+import { chain } from 'lodash';
 
 const router = Router();
 
@@ -10,13 +11,37 @@ router.put('/products', async (req, res, next) => {
   const ids = params.map(({ machine, product }) => {
     return `${machine}${product}`;
   });
+  // 업데이트 조회
   const updateRows = params.map(({ machine, product, count }) => {
     return { id: `${machine}${product}`, count };
   });
 
+  const machinesIds = chain(params)
+    .map('machine')
+    .uniq()
+    .sort()
+    .value();
+  await Promise.all([
+    ...machinesIds.map((id) => {
+      return db.machine.findOrCreate({ where: { id }, defaults: { id, name: `${numeral(id).format('000')} 자판기`, isBroken: false } });
+    }),
+  ]);
+
   await Promise.all(
     updateRows.map(({ id, count }) => {
-      return db.product.update({ count, isBroken: false }, { where: { id } });
+      const machineId = id.substring(0, 3);
+      return db.product
+        .findOrCreate({
+          where: { id },
+          defaults: { count, name: `상품 ${id}`, price: 1000, machineId },
+        })
+        .spread(async (product, created) => {
+          if (created) {
+            const machineId = id.substring(0, 3);
+            await db.machine.create({ id: machineId, name: `${id} 자판기`, isBroken: false });
+          }
+          return product.update({ count });
+        });
     }),
   );
 
@@ -30,8 +55,7 @@ router.put('/products', async (req, res, next) => {
 
 // 코인정보 업데이트
 router.put('/coins', async (req, res, next) => {
-  const coins = 
-  await db.kiosk.findOne().then((kiosk) => {
+  const coins = await db.kiosk.findOne().then((kiosk) => {
     return kiosk.update(req.body);
   });
 
@@ -59,7 +83,7 @@ router.post('/machine/error', async (req, res, next) => {
 
   // 고장 장비이름 목록
   const errorMachines = [...vendingMachine.map(({ name }) => name), ...systemMachine];
-  await db.machineError.create({ 
+  await db.machineError.create({
     reason: `${errorMachines.join(', ')} 에서 오류 발생`,
     sms: '아래 장치의 오류로 판매가 중지되었습니다',
   });

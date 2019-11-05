@@ -1,10 +1,11 @@
 {
   "development": {
-    "username": "payot",
-    "password": "vpdldhxl2017",
-    "database": "TNS",
-    "host": "payot-renew-manager.cjdio7be0ee3.ap-northeast-2.rds.amazonaws.com",
+    "username": "root",
+    "password": "root",
+    "database": "sindo",
+    "host": "127.0.0.1",
     "dialect": "mysql",
+    "port": 7000,
     "logging": false
   },
   "test": {
