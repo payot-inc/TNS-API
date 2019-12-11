@@ -8,6 +8,7 @@ const router = Router();
 // 재고정보 불러오기 & 업데이트
 router.put('/products', async (req, res, next) => {
   let params = req.body;
+  console.log(params);
   params = params.filter(({ machine }) => Number(machine) <= 30);
   const ids = params.map(({ machine, product }) => {
     return `${machine}${product}`;
