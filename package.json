@@ -10,7 +10,8 @@
     "start": "npm run build && node ./dist/app.js",
     "dev": "nodemon --exec babel-node ./src/app.js",
     "dummy": "babel-node ./src/dummy.js",
-    "build": "babel src --out-dir dist"
+    "build": "babel src --out-dir dist",
+    "restart": "pm2 stop api && pm2 start ./dist/app.js -i 0"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.2",
