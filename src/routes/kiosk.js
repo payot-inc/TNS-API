@@ -57,7 +57,6 @@ router.put('/products', async (req, res, next) => {
 
 // 코인정보 업데이트
 router.put('/coins', async (req, res, next) => {
-  console.log(req.body);
   let coins = await db.kiosk.findOne();
   if (!coins) {
     await db.kiosk.create(req.body);

@@ -34,13 +34,13 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use('/admin', AdminRouter);
 app.use('/kiosk', KioskRouter);
-app.use('/mobile', (req, res, next) => {
-  socket.once('connection', (ws, request) => {
-    console.log('connect');
-    req.ws = ws;
-    next();
-  });
-});
+// app.use('/mobile', (req, res, next) => {
+//   socket.once('connection', (ws, request) => {
+//     console.log('connect');
+//     req.ws = ws;
+//     next();
+//   });
+// });
 
 app.use('/mobile', MobileRouter(messageEventer));
 
