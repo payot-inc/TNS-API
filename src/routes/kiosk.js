@@ -7,10 +7,12 @@ const router = Router();
 
 // 재고정보 불러오기 & 업데이트
 router.put('/products', async (req, res, next) => {
-  const params = req.body;
+  let params = req.body;
+  params = params.filter(({ machine }) => Number(machine) <= 30);
   const ids = params.map(({ machine, product }) => {
     return `${machine}${product}`;
   });
+
   // 업데이트 조회
   const updateRows = params.map(({ machine, product, count }) => {
     return { id: `${machine}${product}`, count };
@@ -21,11 +23,12 @@ router.put('/products', async (req, res, next) => {
     .uniq()
     .sort()
     .value();
-  await Promise.all([
-    ...machinesIds.map((id) => {
+
+  await Promise.all(
+    machinesIds.map((id) => {
       return db.machine.findOrCreate({ where: { id }, defaults: { id, name: `${numeral(id).format('000')} 자판기`, isBroken: false } });
     }),
-  ]);
+  );
 
   await Promise.all(
     updateRows.map(({ id, count }) => {
@@ -33,17 +36,15 @@ router.put('/products', async (req, res, next) => {
       return db.product
         .findOrCreate({
           where: { id },
-          defaults: { count, name: `상품 ${id}`, price: 1000, machineId },
+          defaults: { count, name: `상품 ${id}`, image: '', price: 1000, machineId },
         })
         .spread(async (product, created) => {
-          if (created) {
-            const machineId = id.substring(0, 3);
-            await db.machine.create({ id: machineId, name: `${id} 자판기`, isBroken: false });
-          }
-          return product.update({ count });
+          if (created) return product;
+          await product.update({ count });
+          return product; 
         });
     }),
-  );
+  ).catch(console.log);
 
   const resultRows = await db.product.findAll({
     where: { id: ids },
@@ -55,11 +56,15 @@ router.put('/products', async (req, res, next) => {
 
 // 코인정보 업데이트
 router.put('/coins', async (req, res, next) => {
-  const coins = await db.kiosk.findOne().then((kiosk) => {
-    return kiosk.update(req.body);
-  });
-
-  res.json({ status: true });
+  console.log(req.body);
+  let coins = await db.kiosk.findOne();
+  if (!coins) {
+    await db.kiosk.create(req.body);
+    res.json({ status: true, data: coins });
+  } else {
+    await coins.update(req.body);
+    res.json({ status: true, data: coins });
+  }
 });
 
 // 장비 고장 등록

@@ -1,11 +1,9 @@
 import '@babel/polyfill';
 import './plugins/env';
 import './plugins/db';
-// import './plugins/websocket';
 import './middleware/kiosk';
 import http from 'http';
 import express from 'express';
-// import websocket from './plugins/websocket';
 import websocket from 'ws';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -15,11 +13,14 @@ import AdminRouter from './routes/admin';
 import KioskRouter from './routes/kiosk';
 import MobileRouter from './routes/mobile';
 import { Subject } from 'rxjs';
+import db from './db/models';
 
 const app = express();
 const server = http.createServer(app);
 const socket = new websocket.Server({ server });
 const messageEventer = new Subject();
+
+// db.sequelize.sync({ force: true });
 
 socket.on('connection', (ws, res) => {
   messageEventer.subscribe((msg) => ws.send(msg), () => {});
@@ -33,16 +34,12 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use('/admin', AdminRouter);
 app.use('/kiosk', KioskRouter);
-// app.use('/mobile', (req, res, next) => {
-//   socket.once('connection', (ws, request) => {
-//     console.log('connect');
-//     req.ws = ws;
-//     next();
-//   });
-// });
-
-socket.once('connection', (ws, res) => {
-  console.log(ws);
+app.use('/mobile', (req, res, next) => {
+  socket.once('connection', (ws, request) => {
+    console.log('connect');
+    req.ws = ws;
+    next();
+  });
 });
 
 app.use('/mobile', MobileRouter(messageEventer));

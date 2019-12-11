@@ -3,6 +3,21 @@ import moment from 'moment';
 
 const router = Router();
 
+// 사용자 조회
+router.get('/user', async (req, res, next) => {
+  const user = await db.user.findOrCreate({ where: { id: 1 }, defaults: { name: '', phone: '', isNotifyCoin: false, isNotifyStock: false }, raw: true });
+
+  res.json(user);
+});
+
+// 사용자 정보 업데이트
+router.put('/user', async (req, res, next) => {
+  const params = req.body;
+  await db.user.update(params, { where: { id: 1 }});
+
+  res.json({ status: true });
+});
+
 // 장비 목록 조회
 router.get('/machines', async (req, res, next) => {
   const list = await db.machine.findAll({ include: { model: db.product } });
@@ -107,7 +122,7 @@ router.get('/sale/:id', async (req, res, next) => {
   let saleData = await db.sell.findOne({ where: { id }, attributes: { exclude: ['updatedAt'] }, raw: true });
   const products = await db.product.findAll({
     where: { id: saleData.products },
-    include: [{ model: db.machine, attributes: [], }],
+    include: [{ model: db.machine, attributes: [] }],
     attributes: ['id', [sequelize.col('machine.name'), 'machineName'], 'name', 'price'],
   });
 
@@ -126,6 +141,16 @@ router.get('/machines/broken', async (req, res, next) => {
   });
 
   res.json(results);
+});
+
+// 보유 코인 정보
+router.get('/coins', async (req, res, next) => {
+  const list = await db.kiosk.findOne({
+    attributes: ['coin10', 'coin50', 'coin100', 'coin500', 'coin1000'],
+    raw: true,
+  });
+
+  res.json(list);
 });
 
 export default router;
