@@ -42,13 +42,14 @@ router.put('/products', async (req, res, next) => {
         .spread(async (product, created) => {
           if (created) return product;
           await product.update({ count });
-          return product; 
+          return product;
         });
     }),
   ).catch(console.log);
 
   const resultRows = await db.product.findAll({
     where: { id: ids },
+    includes: { model: db.machine, where: { isBroken: false } },
     raw: true,
   });
 
@@ -70,28 +71,51 @@ router.put('/coins', async (req, res, next) => {
 // 장비 고장 등록
 router.post('/machine/error', async (req, res, next) => {
   const machines = req.body;
-  const vendingMachineIds = machines
-    .filter((n) => n < 900)
-    .map((n) => {
-      return numeral(n).format('000');
-    });
-  const systemMachine = machines
-    .filter((n) => n >= 900)
-    .map((n) => {
-      return { 900: '코인메카', 910: '지폐기' }[n];
-    });
+  // const vendingMachineIds = machines
+  //   .filter((n) => n < 900)
+  //   .map((n) => {
+  //     return numeral(n).format('000');
+  //   });
+  // const systemMachine = machines
+  //   .filter((n) => n >= 900)
+  //   .map((n) => {
+  //     return { 900: '코인메카', 910: '지폐기' }[n];
+  //   });
+
+  console.log(machines);
+
+  // 오류사항 적용
+  await Promise.all(machines.map(({ id, isBroken }) => db.machine.update({ isBroken }, { where: { id } })));
 
   // 오류 등록
   await db.machine.update({ isBroken: true }, { where: { id: vendingMachineIds } });
+  // 업데이트의 내용이 고장 등록이라면
+  const isBrokenUpdate = machines.every(({ isBroken }) => isBroken === true);
+  if (isBrokenUpdate) {
+    // 고장등록이 된다면
+    const devices = machine
+      .map(({ id }) => id)
+      .map((id) => {
+        if (Number(id) < 900) {
+          return `${id}자판기`;
+        }
 
-  const vendingMachine = await db.machine.findAll({ where: { id: vendingMachineIds }, attributes: ['id', 'name'], raw: true });
+        if (Number(id) === 900) {
+          return '코인메카';
+        } else if (Number(id) === 910) {
+          return '지폐기';
+        } else {
+          return `${id}자판기`;
+        }
+      });
+    // 고장내용
+    const reason = JSON.stringify(devices);
+    const smsMessage = `아래 장치들의 동작이상이 감지되었습니다\n${devices.join(',')}`;
+    await db.machineError.create({ reason, smsMessage });
 
-  // 고장 장비이름 목록
-  const errorMachines = [...vendingMachine.map(({ name }) => name), ...systemMachine];
-  await db.machineError.create({
-    reason: `${errorMachines.join(', ')} 에서 오류 발생`,
-    sms: '아래 장치의 오류로 판매가 중지되었습니다',
-  });
+    const { phone } = await db.user.findOne({ attributes: ['phone'] });
+    // SMS 전송
+  }
 
   res.json(machines);
 });
