@@ -64,7 +64,7 @@ router.put('/products', async (req, res, next) => {
   //   .flatten()
   //   .value();
   // // console.log(result);
-  // res.json(resultRows);
+  res.json(resultRows);
 });
 
 router.get('/products', async (req, res, next) => {
