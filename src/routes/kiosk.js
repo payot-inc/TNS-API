@@ -59,6 +59,7 @@ router.put('/products', async (req, res, next) => {
     raw: true,
     nest: true,
   });
+  console.log(resultRows);
   const result = chain(resultRows).map(({ products }) => products).flatten().value();
   console.log(result);
   res.json(result);
