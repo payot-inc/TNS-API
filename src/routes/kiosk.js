@@ -47,11 +47,11 @@ router.put('/products', async (req, res, next) => {
     }),
   ).catch(console.log);
 
-  const resultRows = await db.product.findAll({
-    where: { id: ids },
-    // includes: { model: db.machine, where: { isBroken: false } },
-    raw: true,
-  });
+  // const resultRows = await db.product.findAll({
+  //   where: { id: ids },
+  //   // includes: { model: db.machine, where: { isBroken: false } },
+  //   raw: true,
+  // });
   // const resultRows = await db.machine.findAll({
   //   where: { isBroken: false },
   //   include: [{ model: db.product }],
@@ -64,7 +64,7 @@ router.put('/products', async (req, res, next) => {
   //   .flatten()
   //   .value();
   // // console.log(result);
-  res.json(resultRows);
+  res.json({ status: true });
 });
 
 router.get('/products', async (req, res, next) => {
@@ -103,8 +103,8 @@ router.post('/machine/error', async (req, res, next) => {
   // 오류사항 적용
   await Promise.all(machines.map(({ id, isBroken }) => db.machine.update({ isBroken }, { where: { id } })));
 
-  // 오류 등록
-  await db.machine.update({ isBroken: true }, { where: { id: vendingMachineIds } });
+  // // 오류 등록
+  // await db.machine.update({ isBroken: true }, { where: { id: vendingMachineIds } });
   // 업데이트의 내용이 고장 등록이라면
   const isBrokenUpdate = machines.every(({ isBroken }) => isBroken === true);
   if (isBrokenUpdate) {
