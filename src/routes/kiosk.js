@@ -52,9 +52,6 @@ router.put('/products', async (req, res, next) => {
     // includes: { model: db.machine, where: { isBroken: false } },
     raw: true,
   });
-
-  const resultArray = await db.machine.findAll({ where: { isBroken: false }, attributes: [], include: [{ model: db.product }], raw: true, nest: true });
-  res.json(resultArray.map(({ products }) => products));
   // const resultRows = await db.machine.findAll({
   //   where: { isBroken: false },
   //   include: [{ model: db.product }],
@@ -68,6 +65,11 @@ router.put('/products', async (req, res, next) => {
   //   .value();
   // // console.log(result);
   // res.json(resultRows);
+});
+
+router.get('/products', async (req, res, next) => {
+  const resultArray = await db.machine.findAll({ where: { isBroken: false }, attributes: [], include: [{ model: db.product }], raw: true, nest: true });
+  res.json(resultArray.map(({ products }) => products));
 });
 
 // 코인정보 업데이트
