@@ -47,13 +47,20 @@ router.put('/products', async (req, res, next) => {
     }),
   ).catch(console.log);
 
-  const resultRows = await db.product.findAll({
-    where: { id: ids },
-    includes: { model: db.machine, where: { isBroken: false } },
+  // const resultRows = await db.product.findAll({
+  //   where: { id: ids },
+  //   includes: { model: db.machine, where: { isBroken: false } },
+  //   raw: true,
+  // });
+
+  const resultRows = await db.machine.findAll({
+    where: { isBroken: false },
+    includes: [{ model: db.product }],
     raw: true,
+    nest: true,
   });
 
-  res.json(resultRows);
+  res.json(chain(resultRows).map(({ products }) => products).flatten().value());
 });
 
 // 코인정보 업데이트
