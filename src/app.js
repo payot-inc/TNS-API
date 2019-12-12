@@ -20,7 +20,7 @@ const server = http.createServer(app);
 const socket = new websocket.Server({ server });
 const messageEventer = new Subject();
 
-db.sequelize.sync({ force: true });
+// db.sequelize.sync({ force: true });
 
 socket.on('connection', (ws, res) => {
   messageEventer.subscribe((msg) => ws.send(msg), () => {});

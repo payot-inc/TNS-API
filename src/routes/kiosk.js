@@ -8,7 +8,7 @@ const router = Router();
 // 재고정보 불러오기 & 업데이트
 router.put('/products', async (req, res, next) => {
   let params = req.body;
-  console.log(params);
+  // console.log(params);
   params = params.filter(({ machine }) => Number(machine) <= 30);
   const ids = params.map(({ machine, product }) => {
     return `${machine}${product}`;
@@ -47,22 +47,27 @@ router.put('/products', async (req, res, next) => {
     }),
   ).catch(console.log);
 
-  // const resultRows = await db.product.findAll({
-  //   where: { id: ids },
-  //   includes: { model: db.machine, where: { isBroken: false } },
-  //   raw: true,
-  // });
-
-  const resultRows = await db.machine.findAll({
-    where: { isBroken: false },
-    includes: [{ model: db.product }],
+  const resultRows = await db.product.findAll({
+    where: { id: ids },
+    // includes: { model: db.machine, where: { isBroken: false } },
     raw: true,
-    nest: true,
   });
-  console.log(resultRows);
-  const result = chain(resultRows).map(({ products }) => products).flatten().value();
-  console.log(result);
-  res.json(result);
+
+  const resultArray = await db.machine.findAll({ where: { isBroken: false }, attributes: [], include: [{ model: db.product }], raw: true, nest: true });
+  res.json(resultArray.map(({ products }) => products));
+  // const resultRows = await db.machine.findAll({
+  //   where: { isBroken: false },
+  //   include: [{ model: db.product }],
+  //   raw: true,
+  //   nest: true,
+  // });
+  // console.log(resultRows);
+  // const result = chain(resultRows)
+  //   .map(({ products }) => products)
+  //   .flatten()
+  //   .value();
+  // // console.log(result);
+  // res.json(resultRows);
 });
 
 // 코인정보 업데이트
