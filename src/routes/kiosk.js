@@ -59,8 +59,9 @@ router.put('/products', async (req, res, next) => {
     raw: true,
     nest: true,
   });
-
-  res.json(chain(resultRows).map(({ products }) => products).flatten().value());
+  const result = chain(resultRows).map(({ products }) => products).flatten().value();
+  console.log(result);
+  res.json(result);
 });
 
 // 코인정보 업데이트
