@@ -2,8 +2,35 @@ import { Router } from 'express';
 import db from '../db/models';
 import numeral from 'numeral';
 import { chain } from 'lodash';
+import axios from 'axios';
 
 const router = Router();
+const client = axios.create({
+  baseURL: 'https://alimtalk-api.bizmsg.kr',
+  headers: {
+    'Content-Type': 'application/json',
+    userid: 'payot',
+  },
+})
+
+async function sendSMS(phone, message) {
+  try {
+    const params = [{
+      phn: phone,
+      message_type: 'ft',
+      msg: message,
+      smsKind: 'S',
+      smsSender: '07078076857',
+      msgSms: message,
+      reserveDt: '00000000000000',
+      profile: '9425b9c1b0dced8bfb189d54556f969fdfaa49ad',
+    }];
+
+    client.post('/v2/sender/send', params).then(({ data }) => console.log(data)).catch(console.log);
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 // 재고정보 불러오기 & 업데이트
 router.put('/products', async (req, res, next) => {
@@ -46,24 +73,6 @@ router.put('/products', async (req, res, next) => {
         });
     }),
   ).catch(console.log);
-
-  // const resultRows = await db.product.findAll({
-  //   where: { id: ids },
-  //   // includes: { model: db.machine, where: { isBroken: false } },
-  //   raw: true,
-  // });
-  // const resultRows = await db.machine.findAll({
-  //   where: { isBroken: false },
-  //   include: [{ model: db.product }],
-  //   raw: true,
-  //   nest: true,
-  // });
-  // console.log(resultRows);
-  // const result = chain(resultRows)
-  //   .map(({ products }) => products)
-  //   .flatten()
-  //   .value();
-  // // console.log(result);
   res.json({ status: true });
 });
 
@@ -87,21 +96,10 @@ router.put('/coins', async (req, res, next) => {
 // 장비 고장 등록
 router.post('/machine/error', async (req, res, next) => {
   const machines = req.body;
-  // const vendingMachineIds = machines
-  //   .filter((n) => n < 900)
-  //   .map((n) => {
-  //     return numeral(n).format('000');
-  //   });
-  // const systemMachine = machines
-  //   .filter((n) => n >= 900)
-  //   .map((n) => {
-  //     return { 900: '코인메카', 910: '지폐기' }[n];
-  //   });
 
-  console.log(machines);
-
+  const filterMachine = machines.filter(({ id }) => Number(id) >= 900);
   // 오류사항 적용
-  await Promise.all(machines.map(({ id, isBroken }) => db.machine.update({ isBroken }, { where: { id } })));
+  await Promise.all(filterMachine.map(({ id, isBroken }) => db.machine.update({ isBroken }, { where: { id } })));
 
   // // 오류 등록
   // await db.machine.update({ isBroken: true }, { where: { id: vendingMachineIds } });
@@ -109,7 +107,7 @@ router.post('/machine/error', async (req, res, next) => {
   const isBrokenUpdate = machines.every(({ isBroken }) => isBroken === true);
   if (isBrokenUpdate) {
     // 고장등록이 된다면
-    const devices = machine
+    const devices = machines
       .map(({ id }) => id)
       .map((id) => {
         if (Number(id) < 900) {
@@ -126,11 +124,13 @@ router.post('/machine/error', async (req, res, next) => {
       });
     // 고장내용
     const reason = JSON.stringify(devices);
-    const smsMessage = `아래 장치들의 동작이상이 감지되었습니다\n${devices.join(',')}`;
-    await db.machineError.create({ reason, smsMessage });
+    const smsMessage = `아래 장치들의 동작이상이 감지되었습니다\n\n${devices.join(',')}`;
+    await db.machineError.create({ reason, sms: smsMessage });
 
     const { phone } = await db.user.findOne({ attributes: ['phone'] });
     // SMS 전송
+    const phoneNumber = phone.replace(/^010/, '8210').replace(/-/g, '');
+    await sendSMS(phoneNumber, smsMessage);
   }
 
   res.json(machines);
