@@ -112,14 +112,9 @@ router.post('/machine/error', async (req, res, next) => {
       .map((id) => {
         if (Number(id) < 900) {
           return `${id}자판기`;
-        }
-
-        if (Number(id) === 900) {
-          return '코인메카';
-        } else if (Number(id) === 910) {
-          return '지폐기';
         } else {
-          return `${id}자판기`;
+          const params = { '900': '코인메카 미연결', '901': '코인메카 통신에러', '902': '코인셀렉터 동전걸림', '903': '동전배출 모터에러', '910': '지폐기 오류' }[id];
+          return params;
         }
       });
     // 고장내용
