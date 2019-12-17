@@ -111,7 +111,7 @@ router.post('/machine/error', async (req, res, next) => {
       .map(({ id }) => id)
       .map((id) => {
         if (Number(id) < 900) {
-          return `${id}자판기`;
+          return `${id}자판기(통신에러)`;
         } else {
           const params = { '900': '코인메카 미연결', '901': '코인메카 통신에러', '902': '코인셀렉터 동전걸림', '903': '동전배출 모터에러', '910': '지폐기 오류' }[id];
           return params;
