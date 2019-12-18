@@ -19,7 +19,7 @@ async function sendSMS(phone, message) {
       phn: phone,
       message_type: 'ft',
       msg: message,
-      smsKind: 'S',
+      smsKind: 'L',
       smsSender: '07078076857',
       msgSms: message,
       reserveDt: '00000000000000',
