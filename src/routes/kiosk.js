@@ -11,22 +11,27 @@ const client = axios.create({
     'Content-Type': 'application/json',
     userid: 'payot',
   },
-})
+});
 
 async function sendSMS(phone, message) {
   try {
-    const params = [{
-      phn: phone,
-      message_type: 'ft',
-      msg: message,
-      smsKind: 'L',
-      smsSender: '07078076857',
-      msgSms: message,
-      reserveDt: '00000000000000',
-      profile: '9425b9c1b0dced8bfb189d54556f969fdfaa49ad',
-    }];
+    const params = [
+      {
+        phn: phone,
+        message_type: 'ft',
+        msg: message,
+        smsKind: 'L',
+        smsSender: '07078076857',
+        msgSms: message,
+        reserveDt: '00000000000000',
+        profile: '9425b9c1b0dced8bfb189d54556f969fdfaa49ad',
+      },
+    ];
 
-    client.post('/v2/sender/send', params).then(({ data }) => console.log(data)).catch(console.log);
+    client
+      .post('/v2/sender/send', params)
+      .then(({ data }) => console.log(data))
+      .catch(console.log);
   } catch (error) {
     console.log(error);
   }
@@ -97,12 +102,18 @@ router.put('/coins', async (req, res, next) => {
 router.post('/machine/error', async (req, res, next) => {
   const machines = req.body;
 
-  const filterMachine = machines.filter(({ id }) => Number(id) >= 900);
+  const filterMachine = machines.filter(({ id }) => Number(id.slice(0, 2)) < 90);
   // 오류사항 적용
-  await Promise.all(filterMachine.map(({ id, isBroken }) => db.machine.update({ isBroken }, { where: { id } })));
+  await Promise.all(
+    filterMachine
+      .map(({ id, isBroken }) => ({
+        id: numeral(id.slice(0, 2)).format('000'),
+        isBroken,
+      }))
+      .map(({ id, isBroken }) => db.machine.update({ isBroken }, { where: { id } })),
+  );
 
-  // // 오류 등록
-  // await db.machine.update({ isBroken: true }, { where: { id: vendingMachineIds } });
+  // 오류 등록
   // 업데이트의 내용이 고장 등록이라면
   const isBrokenUpdate = machines.every(({ isBroken }) => isBroken === true);
   if (isBrokenUpdate) {
@@ -110,16 +121,24 @@ router.post('/machine/error', async (req, res, next) => {
     const devices = machines
       .map(({ id }) => id)
       .map((id) => {
-        if (Number(id) < 900) {
-          return `${id}자판기(통신에러)`;
-        } else {
-          const params = { '900': '코인메카 미연결', '901': '코인메카 통신에러', '902': '코인셀렉터 동전걸림', '903': '동전배출 모터에러', '910': '지폐기 오류' }[id];
-          return params;
+        return { id: Number(id.slice(0, 2)), reasonCode: Number(id.slice(2, id.length)) };
+      })
+      .map(({ id, reasonCode }) => {
+        switch (id) {
+          case 91:
+            const cashMachineError = ['미연결', '통신오류', '식별부이상', '지폐걸림', '지폐불출이상'][reasonCode];
+            return `지페식별기 (${cashMachineError})`;
+          case 90:
+            const coinMecaError = ['미연결', '통신오류', '셀렉터이상', '불출이상'][reasonCode];
+            return `코인메카니즘 (${coinMecaError})`;
+          default:
+            const vendingMachineError = ['미연결', '재고데이터이상', 'I/M미연결', 'I/M통신오류', '재고없음'][reasonCode];
+            return `${id}자판기 (${vendingMachineError})`;
         }
       });
     // 고장내용
     const reason = JSON.stringify(devices);
-    const smsMessage = `아래 장치들의 동작이상이 감지되었습니다\n\n${devices.join(',')}`;
+    const smsMessage = `아래 장치들의 동작이상이 감지되었습니다\n\n${devices.join(',\n')}`;
     await db.machineError.create({ reason, sms: smsMessage });
 
     const { phone } = await db.user.findOne({ attributes: ['phone'] });
