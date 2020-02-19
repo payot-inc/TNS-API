@@ -81,6 +81,18 @@ router.put('/products', async (req, res, next) => {
   res.json({ status: true });
 });
 
+// 동전 들어오는 로그
+router.post('/coin', async (req, res, next) => {
+  const { amount } = req.body;
+  const params = {
+    amount: Number(amount),
+    createdAt: new Date(),
+  };
+  const createInputCoin = await db.coin.create(params);
+
+  res.json(createInputCoin);
+});
+
 router.get('/products', async (req, res, next) => {
   const resultArray = await db.machine.findAll({ where: { isBroken: false }, attributes: [], include: [{ model: db.product }], raw: true, nest: true });
   res.json(resultArray.map(({ products }) => products));

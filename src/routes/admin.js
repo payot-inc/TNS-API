@@ -13,7 +13,7 @@ router.get('/user', async (req, res, next) => {
 // 사용자 정보 업데이트
 router.put('/user', async (req, res, next) => {
   const params = req.body;
-  await db.user.update(params, { where: { id: 1 }});
+  await db.user.update(params, { where: { id: 1 } });
 
   res.json({ status: true });
 });
@@ -108,7 +108,11 @@ router.get('/sales/day', async (req, res, next) => {
       },
     },
     group: [[sequelize.fn('DATE', sequelize.col('createdAt'))]],
-    attributes: [[sequelize.fn('COUNT', sequelize.col('amount')), 'count'], [sequelize.fn('SUM', sequelize.col('amount')), 'amount'], [sequelize.fn('DATE', sequelize.col('createdAt')), 'createdAt']],
+    attributes: [
+      [sequelize.fn('COUNT', sequelize.col('amount')), 'count'],
+      [sequelize.fn('SUM', sequelize.col('amount')), 'amount'],
+      [sequelize.fn('DATE', sequelize.col('createdAt')), 'createdAt'],
+    ],
     order: [[sequelize.fn('DATE', sequelize.col('createdAt')), 'ASC']],
     raw: true,
   });
@@ -141,6 +145,19 @@ router.get('/machines/broken', async (req, res, next) => {
   });
 
   res.json(results);
+});
+
+// 금액 투입 로그
+router.get('/input/coin', async (req, res, next) => {
+  const { page = 1, limit = 20 } = req.query;
+  const list = await db.coin.findAndCountAll({
+    attributes: { exclude: ['id'] },
+    limit: Number(limit),
+    offset: (Number(page) - 1) * Number(limit),
+    raw: true,
+  });
+
+  res.json(list);
 });
 
 // 보유 코인 정보
