@@ -144,7 +144,7 @@ router.post('/machine/error', async (req, res, next) => {
             const coinMecaError = ['미연결', '통신오류', '셀렉터이상', '불출이상'][reasonCode];
             return `코인메카니즘 (${coinMecaError})`;
           default:
-            const vendingMachineError = ['미연결', '재고데이터이상', 'I/M미연결', 'I/M통신오류', '재고없음'][reasonCode];
+            const vendingMachineError = ['미연결', '재고데이터이상', 'I/M미연결', 'I/M통신오류', '재고없음', '자판기기계에러'][reasonCode];
             return `${id}자판기 (${vendingMachineError})`;
         }
       });
