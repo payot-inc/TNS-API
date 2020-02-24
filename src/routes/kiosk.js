@@ -82,7 +82,7 @@ router.put('/products', async (req, res, next) => {
 });
 
 // 동전 들어오는 로그
-router.post('/coin', async (req, res, next) => {
+router.post('/input/coin', async (req, res, next) => {
   const { amount } = req.body;
   const params = {
     amount: Number(amount),
