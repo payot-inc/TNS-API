@@ -152,6 +152,7 @@ router.get('/input/coin', async (req, res, next) => {
   const { page = 1, limit = 20 } = req.query;
   const list = await db.coin.findAndCountAll({
     attributes: { exclude: ['id'] },
+    order: [['createdAt', 'DESC']],
     limit: Number(limit),
     offset: (Number(page) - 1) * Number(limit),
     raw: true,
